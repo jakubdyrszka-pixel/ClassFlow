@@ -1,89 +1,56 @@
-<div align="center">
-  <img src="./public/assets/pilates.png" alt="ClassFlow Hero" width="800" style="border-radius: 12px; margin-bottom: 20px;" />
-  
-  # 🌟 ClassFlow 
+# ClassFlow
 
-  **Zdefiniuj na nowo zarządzanie studiem fitness i jogi.**
-  
-  [![Next.js](https://img.shields.io/badge/Next.js-16.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-  [![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-  [![Prisma](https://img.shields.io/badge/Prisma-7.8-2D3748?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_4.0-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-  [![Stripe](https://img.shields.io/badge/Stripe-Payments-indigo?style=for-the-badge&logo=stripe)](https://stripe.com/)
+ClassFlow is a comprehensive software-as-a-service (SaaS) platform designed for fitness studios, yoga schools, and sports clubs. It provides scheduling, booking, and management tools to streamline operations for administrators, instructors, receptionists, and attendees.
 
-</div>
+## Features
 
----
+- **Role-Based Access Control:** Distinct interfaces and permissions for Users, Instructors, Receptionists, and Administrators.
+- **Booking & Scheduling:** Real-time class reservations, waitlist management, and recurring schedule rules (RRule).
+- **Access Management:** Instant QR code-based check-ins for efficient front-desk operations.
+- **Analytics:** Data visualization for class popularity, attendance, and revenue.
+- **Payment Processing:** Integrated billing and subscription management via Stripe.
 
-Witaj w **ClassFlow** – przestrzeni, gdzie pot spotyka się z perfekcją, a codzienność zamienia się w pasję. Nie jesteśmy kolejną powolną aplikacją do rezerwacji. Jesteśmy bezkompromisowym, nowoczesnym systemem SaaS stworzonym, by eliminować tarcie operacyjne i dostarczać **Doświadczenie Premium** zarówno dla klientów, jak i administracji.
+## Architecture
 
-> *"ClassFlow to majstersztyk technologiczny. Środowisko, które zdejmuje z Ciebie ciężar organizacji, pozwalając skupić się w 100% na treningu i biznesie."*
+This project is built using a modern TypeScript stack:
 
----
+- **Framework:** Next.js 16 (React 19)
+- **Styling:** Tailwind CSS v4, Shadcn UI
+- **Database:** PostgreSQL with Prisma ORM
+- **Authentication:** Clerk
+- **Real-time Synchronization:** Pusher
+- **Caching & Rate Limiting:** Upstash Redis
+- **Storage:** Vercel Blob
+- **Payments:** Stripe
+- **Email:** Resend
 
-## 🚀 Architektura i Technologia
+## Local Development
 
-ClassFlow to projekt zbudowany bez kompromisów, wykorzystujący najnowocześniejszy dostępny stack technologiczny, aby zapewnić absolutną niezawodność, wydajność i natychmiastową responsywność.
+### Prerequisites
 
-* ⚡ **Frontend i SSR:** Najnowszy **Next.js 16.2** z **React 19**, zapewniający błyskawiczny Server-Side Rendering i zoptymalizowane Web Vitals.
-* 🎨 **Styling:** **Tailwind CSS v4** w połączeniu z komponentami **Shadcn UI** i **Base UI** dla zniewalającego, płynnego i wysoce kontrastowego interfejsu (WCAG AA).
-* 🗄️ **Baza Danych i ORM:** **PostgreSQL** zarządzany przez **Prisma 7.8**, gwarantujący pełne bezpieczeństwo typów (Type-Safety) i absolutny brak *race-conditions* przy rezerwacjach.
-* 🔐 **Autoryzacja i Bezpieczeństwo:** Niezawodny **Clerk** do zarządzania tożsamościami i RBAC (Role-Based Access Control) dla 4 ról (Użytkownik, Instruktor, Recepcja, Admin).
-* 📡 **Real-time i Zdarzenia:** Zastosowanie **Pusher** do synchronizacji stanów na żywo oraz Webhooków obsługiwanych przez **Svix**.
-* 💳 **Płatności:** Pełna, bezpieczna integracja z systemem **Stripe**.
-* 🚀 **Edge & Cache:** **Upstash Redis** do błyskawicznego cachowania i ratelimitingu, oraz **Vercel Blob** do przechowywania mediów.
-* ✉️ **Komunikacja:** Integracja z **Resend** dla pewnej i szybkiej dostarczalności maili transakcyjnych.
+- Node.js
+- PostgreSQL database
+- API keys for Clerk, Stripe, Pusher, Upstash Redis, and Resend.
 
----
+### Setup Instructions
 
-## 💎 Kluczowe Funkcjonalności
-
-ClassFlow to kompletny ekosystem stworzony z myślą o 4 głównych aktorach:
-
-### 👤 Dla Użytkowników (Klubowiczów)
-* **Rezerwacje Bez Tarcia:** Zapisz się na zajęcia w 3 sekundy.
-* **Smart Pass (Kod QR):** Bezobsługowe wejścia. Twój telefon to Twój klucz do klubu.
-
-### 🏋️ Dla Instruktorów
-* **Zarządzanie na bieżąco:** Podgląd list obecności, szybkie anulacje i notatki z sesji w interfejsie perfekcyjnie dostosowanym do urządzeń mobilnych.
-
-### 🛎️ Dla Recepcji
-* **Frictionless Velocity:** Błyskawiczny skaner QR (`html5-qrcode`) pozwalający na odprawę klientów w ułamku sekundy, nawet w godzinach szczytu.
-* **Instant UI:** Zero przeładowań strony – akcje wykonują się natychmiast.
-
-### 👑 Dla Administratorów (Właścicieli)
-* **Głęboka Analityka:** Zaawansowane wizualizacje przychodów i popularności zajęć napędzane przez bibliotekę **Recharts**.
-* **Pełna Kontrola:** Potężny kreator harmonogramów obsługujący zaawansowane, powtarzalne reguły (RRule) oraz pełen CRUD dla lokalizacji i kadr.
-
----
-
-## 🛠️ Uruchomienie Lokalne (Dla Deweloperów)
-
-Chcesz zobaczyć ten technologiczny cud na własnym komputerze? Rozpoczęcie pracy jest banalnie proste:
-
-1. **Sklonuj repozytorium** i zainstaluj pakiety:
+1. **Install dependencies:**
    ```bash
    npm install
    ```
 
-2. **Skonfiguruj środowisko:**
-   Utwórz plik `.env` na podstawie `.env.example` i uzupełnij klucze API (Postgres, Clerk, Stripe, Pusher, Redis, Resend).
+2. **Environment Variables:**
+   Create a `.env` file in the root directory and populate it with your specific service keys (refer to the required variables in your application).
 
-3. **Zbuduj schemat bazy i uruchom seed:**
+3. **Database Initialization:**
+   Synchronize the database schema and populate it with initial seed data:
    ```bash
    npx prisma db push
    npx tsx --env-file=.env prisma/seed.ts
    ```
 
-4. **Wystartuj aplikację:**
+4. **Run the Development Server:**
    ```bash
    npm run dev
    ```
-   Aplikacja będzie dostępna pod `http://localhost:3000`.
-
----
-
-<div align="center">
-  <i>ClassFlow - Technologia w służbie Twojego ciała.</i>
-</div>
+   The application will be accessible at `http://localhost:3000`.
