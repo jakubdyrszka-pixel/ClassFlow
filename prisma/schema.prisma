@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- RBAC (Auth & Permissions) ---
+
+model User {
+  id        String    @id @default(uuid())
+  clerkId   String    @unique
+  email     String    @unique
+  firstName String?
+  lastName  String?
+  imageUrl  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  roles       UserRole[]
+  bookings    Booking[]
+  waitlists   Waitlist[]
+  attendances Attendance[]
+  auditLogs   AuditLog[]   @relation("AuditLogActor")
+  instructor  Instructor?
+  memberships Membership[]
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique // 'ADMIN', 'INSTRUCTOR', 'RECEPTIONIST', 'USER'
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  action      String   @unique // e.g. 'create:classes', 'view:bookings', 'manage:users'
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles RolePermission[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+// --- Facilities ---
+
+model Location {
+  id           String   @id @default(uuid())
+  name         String
+  address      String?
+  city         String?
+  openingHours String?  @default("06:00 - 22:00")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  rooms Room[]
+}
+
+model Room {
+  id         String   @id @default(uuid())
+  locationId String
+  name       String
+  capacity   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  location      Location       @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  classSessions ClassSession[]
+}
+
+// --- Classes & Instructors ---
+
+model Instructor {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classes       Class[]
+  classSessions ClassSession[]
+}
+
+model Class {
+  id           String   @id @default(uuid())
+  instructorId String
+  name         String
+  description  String?
+  category     String?
+  duration     Int // w minutach
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  instructor Instructor     @relation(fields: [instructorId], references: [id])
+  sessions   ClassSession[]
+}
+
+model ClassSession {
+  id           String   @id @default(uuid())
+  classId      String
+  roomId       String
+  instructorId String
+  startTime    DateTime
+  endTime      DateTime
+  maxCapacity  Int
+  isCancelled  Boolean  @default(false)
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  room        Room         @relation(fields: [roomId], references: [id])
+  instructor  Instructor   @relation(fields: [instructorId], references: [id])
+  bookings    Booking[]
+  waitlists   Waitlist[]
+  attendances Attendance[]
+}
+
+// --- Bookings & Attendance ---
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  NO_SHOW
+}
+
+model Booking {
+  id             String        @id @default(uuid())
+  userId         String
+  classSessionId String
+  status         BookingStatus @default(CONFIRMED)
+  hasPaid        Boolean       @default(false)
+  reminded       Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classSession    ClassSession     @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+  attendance      Attendance?
+  membershipEntry MembershipEntry?
+
+  @@unique([userId, classSessionId])
+}
+
+model Waitlist {
+  id             String   @id @default(uuid())
+  userId         String
+  classSessionId String
+  joinedAt       DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classSession ClassSession @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, classSessionId])
+}
+
+model Attendance {
+  id             String   @id @default(uuid())
+  userId         String
+  classSessionId String
+  bookingId      String   @unique
+  checkedInAt    DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classSession ClassSession @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+  booking      Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, classSessionId])
+}
+
+// --- Membership & Payments ---
+
+enum MembershipStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+model MembershipPlan {
+  id            String   @id @default(uuid())
+  name          String // "Open", "8 wejść", "12 wejść", "Unlimited"
+  entriesTotal  Int? // null = Unlimited
+  priceInCents  Int // w groszach (np. 14900 = 149 PLN)
+  currency      String   @default("pln")
+  stripePriceId String?  @unique
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  memberships Membership[]
+}
+
+model Membership {
+  id                    String           @id @default(uuid())
+  userId                String
+  planId                String
+  entriesRemaining      Int? // null = Unlimited; decrements on each booking
+  status                MembershipStatus @default(ACTIVE)
+  stripeSubscriptionId  String?
+  stripeCustomerId      String?
+  stripePaymentIntentId String?
+  currentPeriodEnd      DateTime?
+  purchasedAt           DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan    MembershipPlan    @relation(fields: [planId], references: [id])
+  entries MembershipEntry[]
+}
+
+model MembershipEntry {
+  id           String   @id @default(uuid())
+  membershipId String
+  bookingId    String?  @unique
+  usedAt       DateTime @default(now())
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  booking    Booking?   @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+}
+
+// --- Audit Log ---
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String? // who performed the action (User.id)
+  actorRole  String? // role of the actor at time of action
+  action     String // e.g. 'booking.create', 'session.cancel', 'user.role_update'
+  entityType String? // 'Booking', 'ClassSession', 'User', 'Membership'
+  entityId   String? // ID of the affected entity
+  metadata   Json? // arbitrary contextual data (old/new state, extra info)
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
