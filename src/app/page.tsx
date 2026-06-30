@@ -1,8 +1,8 @@
 import React from "react";
 import { auth } from "@clerk/nextjs/server";
 
-export default function Home() {
-  const { isSignedIn } = auth();
+export default async function Home() {
+  const { isSignedIn } = await auth();
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <h1 className="text-4xl font-bold mb-4 text-foreground">ClassFlow Demo</h1>
